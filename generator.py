@@ -32,7 +32,7 @@ HTML_TEMPLATE = """
         <div class="kpi-card">Saudáveis 🟢<div class="number" style="color:#28a745;">{{ qtd_saudaveis }}</div></div>
     </div>
 
-    <h3>🚨 Ranking de Prioridades Comerciais</h3>
+    <h3>Ranking de Prioridades Comerciais</h3>
     <table>
         <thead>
             <tr>
