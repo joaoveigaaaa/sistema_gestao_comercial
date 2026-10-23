@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import numpy as np
 import pandas as pd
-from scipy.stats import linregress
+from scipy.stats import kendalltau, linregress
 
 def calcular_tendencia_slope(serie_valores: np.ndarray) -> float:
 

@@ -1,12 +1,20 @@
 import os 
+from urllib.parse import quote_plus
 
-db_config = {
-    "driver": os.getenv("DB_DRIVER"),
-    "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASSWORD"),
-    "host": os.getenv("DB_HOST"),
-    "port": os.getenv("DB_PORT"),
-    "database": os.getenv("DB_DATABASE")
-}
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
 
-database_url = f"{db_config['driver']}://{db_config['user']}:{db_config['password']}@{db_config['host']}:{db_config['port']}/{db_config['database']}"
+load_dotenv()
+
+def get_db_engine():
+    dialeto = os.getenv("DB_DRIVER")
+    odbc_driver = os.getenv("DB_ODBC_DRIVER")
+    user = quote_plus(os.getenv("DB_USER"))
+    senha = quote_plus(os.getenv("DB_PASSWORD"))
+
+    host = os.getenv("DB_HOST")
+    porta = os.getenv("DB_PORT")
+    banco = os.getenv("DB_NAME")
+
+    url = f"{dialeto}://{user}:{senha}@{host}:{porta}/{banco}"
+    return create_engine(url, pool_pre_ping=True)

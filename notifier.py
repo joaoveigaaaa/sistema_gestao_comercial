@@ -1,31 +1,36 @@
-import os 
+import logging
+import os
 import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
+from email.message import EmailMessage
 
-def enviar_email_relatorio(caminho_pdf, destinatarios, assunto="Relatório de Inteligência Comercial"):
-    SMTP_SERVER= os.getenv("SMTP_SERVER")
-    SMTP_PORT= int(os.getenv("SMTP_PORT", 587))
-    SMTP_USER= os.getenv
-    SMTP_PASSWORD= os.getenv("SMTP_PASSWORD")
+from dotenv import load_dotenv
 
-    msg = MIMEMultipart()
-    msg['From'] = SMTP_USER
-    msg['To'] = ", ".join(destinatarios)
-    msg['Subject'] = assunto
+load_dotenv()
 
-    corpo_email = "Prezados,\n\nSegue em anexo o Relatório de Inteligência Comercial.\n\nAtenciosamente,\nEquipe de TI"
-    msg.attach(MIMEText(corpo_email, 'plain'))
+
+def enviar_email_relatorio(caminho_pdf, destinatarios, assunto="Relatório de Inteligência Comercial",
+                           corpo=None):
+    servidor = os.getenv("SMTP_SERVER")
+    porta = int(os.getenv("SMTP_PORT", 587))
+    usuario = os.getenv("SMTP_USER")
+    senha = os.getenv("SMTP_PASSWORD")
+    if not (servidor and usuario and senha):
+        raise RuntimeError("SMTP_SERVER, SMTP_USER e SMTP_PASSWORD precisam estar no .env")
+
+    msg = EmailMessage()
+    msg["From"] = usuario
+    msg["To"] = ", ".join(destinatarios)
+    msg["Subject"] = assunto
+    msg.set_content(corpo or "Prezados,\n\nSegue em anexo o Relatório de Inteligência Comercial.\n\n"
+                              "Atenciosamente,\nEquipe de TI")
 
     with open(caminho_pdf, "rb") as f:
-        part = MIMEApplication(f.read(), Name=os.path.basename(caminho_pdf))
-        part['Content-Disposition'] = f'attachment; filename="{os.path.basename(caminho_pdf)}"'
-        msg.attach(part)
+        msg.add_attachment(f.read(), maintype="application", subtype="pdf",
+                           filename=os.path.basename(caminho_pdf))
 
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.sendmail(SMTP_USER, destinatarios, msg.as_string())
+    with smtplib.SMTP(servidor, porta, timeout=30) as smtp:
+        smtp.starttls()
+        smtp.login(usuario, senha)
+        smtp.send_message(msg)
 
-    print(f"Email enviado com sucesso para: {', '.join(destinatarios)}")
+    logging.info(f"E-mail enviado para: {', '.join(destinatarios)}")
