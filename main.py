@@ -22,8 +22,8 @@ logging.basicConfig(
 
 def _destinatarios() -> list[str]:
 
-    if os.getenv("AMBIENTE","1")  == "1":
-        test = os.getenv("EMAIL_TESTE", "")
+    if os.getenv("AMBIENTE","teste")  != "producao":
+        teste = os.getenv("EMAIL_TESTE", "")
         return [teste] if teste else []
     return [e.strip() for e in os.getenv("EMAIL_DESTINATARIOS", "").split(",") if e.strip()]
 
@@ -46,10 +46,12 @@ def executar_pipeline():
     df.to_csv("ultimo_resumo_cartao.csv", index=False, encoding="utf-8-sig")
 
     logging.info("Passo 3/4: A gerar o relatório PDF executivo...")
+    data_hoje = datetime.datetime.now().strftime("%Y%m%d")
     nome_pdf = f"Relatorio_Inteligencia_Comercial_{data_hoje}.pdf"
+    caminho_pdf = gerar_pdf_relatorio(df, output_pdf=nome_pdf, resumo_texto=resumo)
      
     logging.info("Passo 4/4: A enviar relatórios por e-mail...")
-    destinos = destinatarios ()
+    destinos = _destinatarios ()
     if not destinos:
         logging.warning("Nenhum destinatário configurado. E-mails não serão enviados.")
 
