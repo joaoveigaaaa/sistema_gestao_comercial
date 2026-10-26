@@ -34,3 +34,9 @@ def enviar_email_relatorio(caminho_pdf, destinatarios, assunto="Relatório de In
         smtp.send_message(msg)
 
     logging.info(f"E-mail enviado para: {', '.join(destinatarios)}")
+    with smtplib.SMTP(servidor, porta, timeout=30) as smtp:
+        smtp.starttls()
+        smtp.login(usuario, senha)
+        smtp.send_message(msg)
+
+    logging.info(f"E-mail enviado para: {', '.join(destinatarios)}")
